@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="Bootstrap CMS">
+    <description>The coding standard for Bootstrap CMS, based on PSR-2.</description>
+
+    <file>app</file>
+    <file>tests</file>
+    <file>config</file>
+
+    <!--
+    The database directory is excluded because Laravel 5.1 migrations and
+    seeds are generated without namespaces, which PSR-2 requires.
+    -->
+    <exclude-pattern>*/database/*</exclude-pattern>
+    <exclude-pattern>*/bootstrap/cache/*</exclude-pattern>
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>*/storage/*</exclude-pattern>
+
+    <arg name="colors"/>
+    <arg value="p"/>
+
+    <rule ref="PSR2"/>
+</ruleset>
