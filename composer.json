@@ -35,7 +35,8 @@
         "doctrine/dbal": "~2.5",
         "graham-campbell/testbench-core": "~1.0",
         "mockery/mockery": "^0.9.4",
-        "phpunit/phpunit": "^4.7.6"
+        "phpunit/phpunit": "^4.7.6",
+        "squizlabs/php_codesniffer": "^2.9"
     },
     "suggest": {
         "graham-campbell/cloudflare": "Integration with CloudFlare."
@@ -67,7 +68,9 @@
         ],
         "post-create-project-cmd": [
             "php artisan key:generate"
-        ]
+        ],
+        "test": "phpunit",
+        "lint": "phpcs"
     },
     "config": {
         "preferred-install": "dist"

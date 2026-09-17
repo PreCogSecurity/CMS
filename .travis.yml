@@ -18,8 +18,12 @@ before_script:
   - travis_retry gulp --production
 
 script:
-  - if [ "$TRAVIS_PHP_VERSION" != "5.5.9" ] && [ "$TRAVIS_PHP_VERSION" != "5.5" ] && [ "$TRAVIS_PHP_VERSION" != "5.6" ]; then vendor/bin/phpunit; fi
-  - if [ "$TRAVIS_PHP_VERSION" == "5.5.9" ] || [ "$TRAVIS_PHP_VERSION" == "5.5" ] || [ "$TRAVIS_PHP_VERSION" == "5.6" ]; then vendor/bin/phpunit --coverage-clover build/logs/clover.xml; fi
+  # fail the build if composer.json is invalid
+  - composer validate --no-check-publish
+  # run the test suite on every supported php version
+  - if [ "$TRAVIS_PHP_VERSION" == "5.5.9" ] || [ "$TRAVIS_PHP_VERSION" == "5.5" ] || [ "$TRAVIS_PHP_VERSION" == "5.6" ]; then vendor/bin/phpunit --coverage-clover build/logs/clover.xml; else vendor/bin/phpunit; fi
+  # enforce the PSR-2 coding standard (see phpcs.xml.dist)
+  - vendor/bin/phpcs
 
 after_script:
   - if [ "$TRAVIS_PHP_VERSION" == "5.5.9" ] || [ "$TRAVIS_PHP_VERSION" == "5.5" ] || [ "$TRAVIS_PHP_VERSION" == "5.6" ]; then wget https://scrutinizer-ci.com/ocular.phar; fi

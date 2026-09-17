@@ -15,6 +15,7 @@ use Exception;
 use GrahamCampbell\Binput\Facades\Binput;
 use GrahamCampbell\BootstrapCMS\Facades\PageRepository;
 use GrahamCampbell\Credentials\Facades\Credentials;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\View;
@@ -173,6 +174,8 @@ class PageController extends AbstractController
         try {
             $page->delete();
         } catch (Exception $e) {
+            Log::error('Failed to delete page', ['slug' => $slug, 'exception' => $e]);
+
             return Redirect::route('pages.show', ['pages' => $page->slug])
                 ->with('error', 'You cannot delete this page.');
         }

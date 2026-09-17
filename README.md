@@ -22,7 +22,7 @@ Bootstrap CMS was created by, and is maintained by [Graham Campbell](https://git
   * Use GitHub: simply download the zip on the right of the readme
   * Use Git: `git clone git@github.com:BootstrapCMS/CMS.git`
   * Use Composer: `composer create-project graham-campbell/bootstrap-cms --prefer-dist -s dev`
-2. From a command line open in the folder, run `composer install --no-dev -o` and then `npm install`.
+2. From a command line open in the folder, run `composer install --no-dev -o` and then `npm install` (or `npm ci` if you have npm 7+, which installs the exact versions pinned in the committed `package-lock.json`).
 3. Enter your database details into `config/database.php`.
 4. Run `php artisan app:install` followed by `gulp --production` to setup the application.
 5. You will need to enter your mail server details into `config/mail.php`.
@@ -32,6 +32,17 @@ Bootstrap CMS was created by, and is maintained by [Graham Campbell](https://git
   * I'd recommend [queuing](#setting-up-queing) email sending for greater performance (see below)
 6. Finally, setup an [Apache VirtualHost](http://httpd.apache.org/docs/current/vhosts/examples.html) to point to the "public" folder.
   * For development, you can simply run `php artisan serve`
+
+
+## Testing
+
+The project ships with a PHPUnit test suite covering the controllers, repositories, facades, and commands. The suite runs against an in-memory SQLite database, so no database server is required to run the tests.
+
+1. Install the dev dependencies: `composer install`
+2. Run the test suite: `vendor/bin/phpunit` (or `composer test`)
+3. Check the PSR-2 coding standard: `vendor/bin/phpcs` (or `composer lint`)
+
+Both commands are also run by [Travis CI](https://travis-ci.org/) on every push, so a pull request that breaks the tests or the coding standard will fail the build.
 
 
 ## Setting Up Queuing
