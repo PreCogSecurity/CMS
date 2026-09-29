@@ -30,6 +30,18 @@ Then run phpunit:
 $ vendor/bin/phpunit
 ```
 
-If the test suite passes on your local machine you should be good to go.
+The suite runs against an in-memory SQLite database, so there is no database
+server to set up, and `docker compose run --rm tests` will run it in a
+container if you would rather not install php locally.
 
-When you make a pull request, the tests will automatically be run again by [Travis CI](https://travis-ci.org/) on multiple php versions and hhvm.
+Then check the coding standard:
+
+```bash
+$ composer lint
+```
+
+If the test suite and the linter pass on your local machine you should be good
+to go.
+
+When you make a pull request, the tests, the linter and a coverage run are
+executed again by [GitHub Actions](https://github.com/PreCogSecurity/CMS/actions).

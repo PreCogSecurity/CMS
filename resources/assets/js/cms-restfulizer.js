@@ -1,10 +1,11 @@
 $(function () {
     $('[data-method]').not(".disabled").append(function () {
+        var token = $(this).attr('data-token') || cmsCsrfToken();
         var methodForm = "\n"
         methodForm += "<form action='" + $(this).attr('href') + "' method='POST' style='display:none'>\n"
         methodForm += " <input type='hidden' name='_method' value='" + $(this).attr('data-method') + "'>\n"
-        if ($(this).attr('data-token')) {
-            methodForm += "<input type='hidden' name='_token' value='" + $(this).attr('data-token') + "'>\n"
+        if (token) {
+            methodForm += "<input type='hidden' name='_token' value='" + token + "'>\n"
         }
         methodForm += "</form>\n"
         return methodForm

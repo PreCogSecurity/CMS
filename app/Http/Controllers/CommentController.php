@@ -103,6 +103,10 @@ class CommentController extends AbstractController
      */
     public function store($postId)
     {
+        if (!PostRepository::find($postId, ['id'])) {
+            throw new NotFoundHttpException('Post Not Found');
+        }
+
         $input = array_merge(Binput::only('body'), [
             'user_id' => Credentials::getuser()->id,
             'post_id' => $postId,
@@ -141,7 +145,7 @@ class CommentController extends AbstractController
     public function show($postId, $id)
     {
         $comment = CommentRepository::find($id);
-        $this->checkComment($comment);
+        $this->checkComment($comment, $postId);
 
         $contents = View::make('posts.comment', [
             'comment' => $comment,
@@ -176,7 +180,7 @@ class CommentController extends AbstractController
         }
 
         $comment = CommentRepository::find($id);
-        $this->checkComment($comment);
+        $this->checkComment($comment, $postId);
 
         $version = Binput::get('version');
 
@@ -212,7 +216,7 @@ class CommentController extends AbstractController
     public function destroy($postId, $id)
     {
         $comment = CommentRepository::find($id);
-        $this->checkComment($comment);
+        $this->checkComment($comment, $postId);
 
         $comment->delete();
 
@@ -226,15 +230,21 @@ class CommentController extends AbstractController
     /**
      * Check the comment model.
      *
-     * @param mixed $comment
+     * A comment is always addressed through the post that it hangs off, so we
+     * refuse to serve, edit or delete one through the url of a different post.
+     * Otherwise a moderator can be tricked into removing, or worse rewriting,
+     * a comment on a post they were never looking at.
+     *
+     * @param mixed  $comment
+     * @param string $postId
      *
      * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
      *
      * @return void
      */
-    protected function checkComment($comment)
+    protected function checkComment($comment, $postId)
     {
-        if (!$comment) {
+        if (!$comment || (int) $comment->post_id !== (int) $postId) {
             throw new NotFoundHttpException('Comment Not Found');
         }
     }

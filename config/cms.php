@@ -59,15 +59,19 @@ return [
     |
     | This defines if the page eval functionality is enabled.
     |
-    | Disabling it will prevent people from executing php on pages. This would
-    | be useful if you wanted to prevent users writing dynamic pages, because
-    | allowing them to execute php means they can do anything really.
+    | Enabling it means the page body is passed straight to php's eval, so
+    | anybody who is allowed to edit a page gets arbitrary code execution on
+    | the web server: read the environment file, write files, reach the
+    | database, and so on. Only turn it on for single author sites where you
+    | trust every single account with edit access, and never expose it on a
+    | multi tenant install.
     |
-    | Default to true.
+    | Default to false. Existing installs that relied on it should set
+    | CMS_EVAL=true in their .env file explicitly.
     |
     */
 
-    'eval' => env('CMS_EVAL', true),
+    'eval' => env('CMS_EVAL', false),
 
     /*
     |--------------------------------------------------------------------------

@@ -95,6 +95,26 @@ class PageControllerTest extends AbstractTestCase
         $this->assertSessionHas('success');
     }
 
+    public function testStoreRejectsASlugThatIsAlreadyInUse()
+    {
+        // 'home' is seeded, and the homepage is not ours to shadow
+        $this->post('pages', [
+            'title'      => 'Impostor',
+            'nav_title'  => 'Impostor',
+            'slug'       => 'home',
+            'icon'       => '',
+            'body'       => 'Not really the homepage.',
+            'css'        => '',
+            'js'         => '',
+            'show_title' => 'on',
+            'show_nav'   => 'on',
+        ]);
+
+        $this->assertRedirectedTo('pages/create');
+        $this->assertSessionHasErrors('slug');
+        $this->assertHasOldInput();
+    }
+
     public function testUpdateValidationFails()
     {
         $this->patch('pages/home', []);
@@ -158,6 +178,67 @@ class PageControllerTest extends AbstractTestCase
 
         $this->assertRedirectedTo('pages/home');
         $this->assertSessionHas('success');
+    }
+
+    public function testUpdateRejectsASlugThatIsAlreadyInUse()
+    {
+        // moving a page onto the homepage slug would leave two live pages
+        // answering on the same url
+        $this->patch('pages/about', [
+            'title'      => 'About',
+            'nav_title'  => 'About',
+            'slug'       => 'home',
+            'icon'       => '',
+            'body'       => 'About us',
+            'css'        => '',
+            'js'         => '',
+            'show_title' => 'on',
+            'show_nav'   => 'on',
+        ]);
+
+        $this->assertRedirectedTo('pages/about/edit');
+        $this->assertSessionHasErrors('slug');
+        $this->assertHasOldInput();
+    }
+
+    public function testEvalIsDisabledByDefault()
+    {
+        $this->assertFalse($this->app['config']->get('cms.eval'));
+    }
+
+    public function testPageBodyIsNotExecuted()
+    {
+        $this->patch('pages/home', [
+            'title'      => 'Home',
+            'nav_title'  => 'Home',
+            'slug'       => 'home',
+            'icon'       => '',
+            'body'       => "<?php echo strrev('desrever'); ?>",
+            'css'        => '',
+            'js'         => '',
+            'show_title' => 'on',
+            'show_nav'   => 'on',
+        ]);
+
+        $this->get('pages/home');
+
+        $this->assertResponseOk();
+
+        // the body is output as it is, it is never handed to php's eval
+        $this->assertNotContains('reversed', $this->response->getContent());
+    }
+
+    public function testContactPlaceholderIsExpanded()
+    {
+        $this->get('pages/contact');
+
+        $this->assertResponseOk();
+
+        $content = $this->response->getContent();
+
+        // the contact form is pulled in per request, so its csrf token is fresh
+        $this->assertNotContains('{contact}', $content);
+        $this->assertContains('name="first_name"', $content);
     }
 
     public function testDestroyHomeFails()

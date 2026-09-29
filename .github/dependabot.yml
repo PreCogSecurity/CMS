@@ -11,6 +11,9 @@ updates:
     open-pull-requests-limit: 5
     commit-message:
       prefix: "composer"
+    labels:
+      - "dependencies"
+      - "php"
 
   # Node.js dependencies (package.json + package-lock.json)
   - package-ecosystem: "npm"
@@ -20,3 +23,17 @@ updates:
     open-pull-requests-limit: 5
     commit-message:
       prefix: "npm"
+    labels:
+      - "dependencies"
+      - "javascript"
+
+  # The CI pipeline itself (Dockerfile, compose file, workflows)
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "ci"
+    labels:
+      - "dependencies"
+      - "ci"

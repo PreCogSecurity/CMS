@@ -1,4 +1,5 @@
 function cmsCommentDeleteSubmit(that) {
+    // the csrf token is attached by the ajax setup in cms-csrf.js
     $.ajax({
         url: $(that).attr("href"),
         type: "DELETE",

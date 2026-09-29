@@ -158,4 +158,39 @@ class PageRepositoryTest extends AbstractTestCase
         $this->setExpectedException('Exception', 'You cannot delete the homepage.');
         $page->delete();
     }
+
+    public function testSeededPageBodiesAreRenderedContent()
+    {
+        // the stubs are rendered once, at install time, so that the shipped
+        // pages do not depend on the eval feature
+        $body = $this->getRepository()->find('home')->body;
+
+        $this->assertNotContains('<?php', $body);
+        $this->assertNotContains('<?=', $body);
+        $this->assertContains('Powered by Laravel 5 with Bootstrap CMS and Sentry', $body);
+    }
+
+    public function testHasSlugFindsAnExistingSlug()
+    {
+        $this->assertTrue($this->getRepository()->hasSlug('home'));
+    }
+
+    public function testHasSlugReturnsFalseForAnUnknownSlug()
+    {
+        $this->assertFalse($this->getRepository()->hasSlug('does-not-exist'));
+    }
+
+    public function testHasSlugCanIgnoreThePageItself()
+    {
+        $page = $this->getRepository()->find('home');
+
+        $this->assertFalse($this->getRepository()->hasSlug('home', $page->id));
+    }
+
+    public function testHasSlugStillFindsAnotherPage()
+    {
+        $page = $this->getRepository()->find('home');
+
+        $this->assertTrue($this->getRepository()->hasSlug('about', $page->id));
+    }
 }

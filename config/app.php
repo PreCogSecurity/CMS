@@ -120,6 +120,22 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Structured Logging
+    |--------------------------------------------------------------------------
+    |
+    | When this is enabled, every log handler is switched over to monolog's
+    | json formatter, so each line of the log file is a single structured
+    | object containing the message, the level, the timestamp and the context
+    | array we pass to Log::error and friends.
+    |
+    | Turn this on in production so that logs can be shipped and queried.
+    |
+    */
+
+    'log_json' => env('APP_LOG_JSON', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Autoloaded Service Providers
     |--------------------------------------------------------------------------
     |
@@ -168,6 +184,7 @@ return [
         'GrahamCampbell\Navigation\NavigationServiceProvider',
         'GrahamCampbell\Contact\ContactServiceProvider',
         'GrahamCampbell\LogViewer\LogViewerServiceProvider',
+        'GrahamCampbell\BootstrapCMS\Providers\LoggingServiceProvider',
         'GrahamCampbell\BootstrapCMS\Providers\AppServiceProvider',
         'GrahamCampbell\BootstrapCMS\Providers\RouteServiceProvider',
 

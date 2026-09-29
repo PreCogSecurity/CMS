@@ -83,6 +83,11 @@ class PageController extends AbstractController
             return Redirect::route('pages.create')->withInput()->withErrors($val->errors());
         }
 
+        if (PageRepository::hasSlug($input['slug'])) {
+            return Redirect::route('pages.create')->withInput()
+                ->withErrors(['slug' => 'That page slug is already in use.']);
+        }
+
         $page = PageRepository::create($input);
 
         // write flash message and redirect
@@ -150,6 +155,11 @@ class PageController extends AbstractController
         $checkupdate = $this->checkUpdate($input, $slug);
         if ($checkupdate) {
             return $checkupdate;
+        }
+
+        if (PageRepository::hasSlug($input['slug'], $page->id)) {
+            return Redirect::route('pages.edit', ['pages' => $slug])->withInput()
+                ->withErrors(['slug' => 'That page slug is already in use.']);
         }
 
         $page->update($input);

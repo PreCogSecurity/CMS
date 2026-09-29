@@ -15,7 +15,6 @@ use Carbon\Carbon;
 use GrahamCampbell\Binput\Facades\Binput;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
 
 /**
  * This is the pages table seeder class.
@@ -77,14 +76,37 @@ class PagesTableSeeder extends Seeder
     /**
      * Get the page content.
      *
+     * The stubs are templates rather than content: we render each of them once,
+     * here, so what lands in the database is finished html. That is what lets
+     * us keep the page eval feature switched off, since nothing in the shipped
+     * pages needs to be executed at request time. The contact form is the one
+     * exception, and it is pulled in through the {contact} placeholder at
+     * render time so that its csrf token stays fresh.
+     *
      * @param string $page
      *
      * @return string
      */
     protected function getContent($page)
     {
-        $content = File::get(dirname(__FILE__).'/page-'.$page.'.stub');
+        $content = $this->render(dirname(__FILE__).'/page-'.$page.'.stub');
 
         return Binput::clean($content, true, false);
+    }
+
+    /**
+     * Render a stub file and return the html it produced.
+     *
+     * @param string $path
+     *
+     * @return string
+     */
+    protected function render($path)
+    {
+        ob_start();
+
+        include $path;
+
+        return ob_get_clean();
     }
 }

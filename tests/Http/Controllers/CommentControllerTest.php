@@ -71,6 +71,13 @@ class CommentControllerTest extends AbstractTestCase
         $this->assertResponseStatus(400);
     }
 
+    public function testStoreFailsForAnUnknownPost()
+    {
+        $this->post('blog/posts/999/comments', ['body' => 'A brand new comment']);
+
+        $this->assertResponseStatus(404);
+    }
+
     public function testStoreSuccess()
     {
         $this->post('blog/posts/1/comments', ['body' => 'A brand new comment']);
@@ -97,6 +104,14 @@ class CommentControllerTest extends AbstractTestCase
     public function testShowFail()
     {
         $this->get('blog/posts/1/comments/999');
+
+        $this->assertResponseStatus(404);
+    }
+
+    public function testShowFailsForACommentOnAnotherPost()
+    {
+        // comment 1 belongs to post 1, so it does not exist under post 999
+        $this->get('blog/posts/999/comments/1');
 
         $this->assertResponseStatus(404);
     }
@@ -149,5 +164,22 @@ class CommentControllerTest extends AbstractTestCase
         $json = json_decode($this->response->getContent(), true);
         $this->assertTrue($json['success']);
         $this->assertSame('Comment deleted successfully.', $json['msg']);
+    }
+
+    public function testUpdateFailsForACommentOnAnotherPost()
+    {
+        $this->patch('blog/posts/999/comments/1', [
+            'edit_body' => 'Updated comment',
+            'version'   => 1,
+        ]);
+
+        $this->assertResponseStatus(404);
+    }
+
+    public function testDestroyFailsForACommentOnAnotherPost()
+    {
+        $this->delete('blog/posts/999/comments/1');
+
+        $this->assertResponseStatus(404);
     }
 }

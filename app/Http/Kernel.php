@@ -23,16 +23,19 @@ class Kernel extends HttpKernel
     /**
      * The application's global HTTP middleware stack.
      *
+     * These middleware are run during every request to your application.
+     *
      * @var string[]
      */
     protected $middleware = [
         'Fideloper\Proxy\TrustProxies',
         'GrahamCampbell\BootstrapCMS\Http\Middleware\CheckForMaintenanceMode',
-        'Illuminate\Cookie\Middleware\EncryptCookies',
+        'GrahamCampbell\BootstrapCMS\Http\Middleware\EncryptCookies',
         'Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse',
         'Illuminate\Session\Middleware\StartSession',
+        'GrahamCampbell\BootstrapCMS\Http\Middleware\SecurityHeaders',
         'Illuminate\View\Middleware\ShareErrorsFromSession',
-        // 'Illuminate\Foundation\Http\Middleware\VerifyCsrfToken',
+        'GrahamCampbell\BootstrapCMS\Http\Middleware\VerifyCsrfToken',
     ];
 
     /**
