@@ -1,0 +1,113 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  workflow_dispatch:
+
+# a pull request supersedes the push it came from, so an outdated build for
+# the same commit should not hold up the merge
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  coding-standard:
+    name: Coding standard (PSR-2)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          extensions: mbstring, openssl, pdo_sqlite
+          coverage: none
+          tools: composer:v2
+
+      # --no-scripts keeps the framework's artisan post install hooks out of a
+      # build that has no .env file or database yet
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-scripts
+
+      - name: Validate composer.json
+        run: composer validate --no-check-publish
+
+      - name: Run phpcs
+        run: vendor/bin/phpcs
+
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          extensions: mbstring, openssl, pdo_sqlite
+          coverage: none
+          tools: composer:v2
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-scripts
+
+      # the suite runs against an in memory sqlite database, so there is
+      # nothing else to start here
+      - name: Run phpunit
+        run: vendor/bin/phpunit
+
+  coverage:
+    name: Code coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          extensions: mbstring, openssl, pdo_sqlite
+          coverage: xdebug
+          tools: composer:v2
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-scripts
+
+      - name: Run phpunit with coverage
+        run: vendor/bin/phpunit --coverage-clover build/logs/clover.xml
+
+      - name: Upload the coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: clover
+          path: build/logs/clover.xml
+          if-no-files-found: error
+
+  dependency-audit:
+    name: Dependency audit (informational)
+    runs-on: ubuntu-latest
+
+    # the laravel 5.1 line this project is built on carries published
+    # advisories, and the upgrade path is a project in its own right, so this
+    # job reports rather than blocks. See UPGRADE.md.
+    continue-on-error: true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          tools: composer:v2
+
+      - name: Audit the composer dependencies
+        run: composer audit

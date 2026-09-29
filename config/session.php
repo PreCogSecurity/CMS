@@ -155,8 +155,13 @@ return [
     | to the server if the browser has a HTTPS connection. This will keep
     | the cookie from being sent to you if it can not be done securely.
     |
+    | This defaults to true whenever the application url is served over https,
+    | and can be forced either way with the SESSION_SECURE environment
+    | variable. Anything deliberately served over plain http has to set it to
+    | false, otherwise the browser will refuse to store the session.
+    |
     */
 
-    'secure' => false,
+    'secure' => env('SESSION_SECURE', strpos(env('APP_URL', 'http://localhost'), 'https://') === 0),
 
 ];

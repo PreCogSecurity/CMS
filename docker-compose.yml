@@ -1,0 +1,63 @@
+# One command brings the whole thing up:
+#
+#   docker compose up --build
+#
+# The tests service runs the phpunit suite against an in memory sqlite
+# database and needs nothing else at all:
+#
+#   docker compose run --rm tests
+#
+services:
+  db:
+    image: mysql:5.7
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+      MYSQL_DATABASE: bootstrapcms
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '--silent']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      APP_ENV: local
+      APP_DEBUG: 'true'
+      APP_URL: http://localhost:8000
+      # laravel 5.1 needs a raw 32 character key here, and this one is a
+      # published sandbox value, so replace it with `php artisan key:generate`
+      APP_KEY: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+      APP_LOG: daily
+      APP_LOG_JSON: 'false'
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_DATABASE: bootstrapcms
+      DB_USERNAME: root
+      DB_PASSWORD: ''
+      CACHE_DRIVER: file
+      SESSION_DRIVER: file
+      SESSION_SECURE: 'false'
+      QUEUE_DRIVER: sync
+      MAIL_DRIVER: log
+    ports:
+      - '8000:8000'
+    command: >
+      sh -c "php artisan app:install && php -S 0.0.0.0:8000 -t public server.php"
+
+  tests:
+    build: .
+    environment:
+      APP_ENV: testing
+      APP_KEY: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+      DB_CONNECTION: sqlite
+      DB_HOST: ':memory:'
+      CACHE_DRIVER: array
+      SESSION_DRIVER: array
+      QUEUE_DRIVER: sync
+      MAIL_DRIVER: log
+    command: vendor/bin/phpunit

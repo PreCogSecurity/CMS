@@ -21,6 +21,7 @@ use GrahamCampbell\BootstrapCMS\Repositories\PostRepository;
 use GrahamCampbell\BootstrapCMS\Subscribers\CommandSubscriber;
 use GrahamCampbell\BootstrapCMS\Subscribers\NavigationSubscriber;
 use Illuminate\Support\ServiceProvider;
+use RuntimeException;
 
 /**
  * This is the app service provider class.
@@ -82,6 +83,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->checkAppKey();
+
         $this->registerNavigationFactory();
 
         $this->registerCommentRepository();
@@ -243,6 +246,45 @@ class AppServiceProvider extends ServiceProvider
 
             return new CommentController($throttler);
         });
+    }
+
+    /**
+     * Ensure that we are not serving traffic with a guessable application key.
+     *
+     * The key is what protects our cookies and every encrypted value in the
+     * application, so shipping the placeholder from .env.example, or no key at
+     * all, means that anybody can forge a session and act as any user. Console
+     * commands are deliberately exempt so that "php artisan key:generate" is
+     * always able to fix the problem.
+     *
+     * @throws \RuntimeException
+     *
+     * @return void
+     */
+    protected function checkAppKey()
+    {
+        if ($this->app->runningInConsole()) {
+            return;
+        }
+
+        if (self::hasWeakAppKey($this->app['config']->get('app.key'))) {
+            $message = 'Your application key is missing or too short. Run "php artisan key:generate" '.
+                'and set APP_KEY in your .env file before serving requests.';
+
+            throw new RuntimeException($message);
+        }
+    }
+
+    /**
+     * Determine if the given application key is unsafe to serve traffic with.
+     *
+     * @param mixed $key
+     *
+     * @return bool
+     */
+    public static function hasWeakAppKey($key)
+    {
+        return !is_string($key) || strlen($key) < 32;
     }
 
     /**

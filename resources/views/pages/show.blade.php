@@ -50,10 +50,11 @@
     </div>
     <hr>
 @endauth
+{{-- $page->content expands the {contact} placeholder, and is the raw body unless the eval feature is switched on --}}
 @if (Config::get('cms.eval', false))
-<?php eval('?>'.$page->body); ?>
+<?php eval('?>'.$page->content); ?>
 @else
-{!! $page->body !!}
+{!! $page->content !!}
 @endif
 @stop
 

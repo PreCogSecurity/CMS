@@ -1,0 +1,11 @@
+.git
+.github
+.env
+node_modules
+public/assets/scripts/*.js
+public/assets/styles/*.css
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/logs/*
+vendor

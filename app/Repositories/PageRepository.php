@@ -33,6 +33,34 @@ class PageRepository extends AbstractRepository
     protected $nav = [];
 
     /**
+     * Determine if a page is already using the given slug.
+     *
+     * A slug is the public url of a page, so two live pages sharing one means
+     * that show, edit and delete all operate on whichever row the database
+     * happens to hand back first, and a second page can shadow the homepage.
+     * This is checked here rather than with a unique index because pages are
+     * soft deleted, so a plain index would also block reusing the slug of a
+     * page that has already been deleted.
+     *
+     * @param string   $slug
+     * @param int|null $ignoreId
+     *
+     * @return bool
+     */
+    public function hasSlug($slug, $ignoreId = null)
+    {
+        $model = $this->model;
+
+        $query = $model::where('slug', '=', $slug);
+
+        if ($ignoreId !== null) {
+            $query->where('id', '<>', $ignoreId);
+        }
+
+        return $query->exists();
+    }
+
+    /**
      * Get the page navigation.
      *
      * @return array

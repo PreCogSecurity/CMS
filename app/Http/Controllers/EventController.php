@@ -133,7 +133,7 @@ class EventController extends AbstractController
     {
         $input = Binput::only(['title', 'location', 'date', 'body']);
 
-        $val = $val = EventRepository::validate($input, array_keys($input));
+        $val = EventRepository::validate($input, array_keys($input));
         if ($val->fails()) {
             return Redirect::route('events.edit', ['events' => $id])->withInput()->withErrors($val->errors());
         }

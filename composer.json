@@ -70,7 +70,8 @@
             "php artisan key:generate"
         ],
         "test": "phpunit",
-        "lint": "phpcs"
+        "lint": "phpcs",
+        "audit": "composer audit"
     },
     "config": {
         "preferred-install": "dist"
